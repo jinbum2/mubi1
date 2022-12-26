@@ -1,0 +1,17 @@
+server-context.xml에 넣기
+
+<Resource
+name="jdbc/OracleDB"
+auth="Container"
+driverClassName="oracle.jdbc.driver.OracleDriver"
+type="javax.sql.DataSource"
+url="jdbc:oracle:thin:@localhost:1521:xe"
+username="HR"
+password="HR"
+maxActive="20"
+maxIdle="10"
+maxWait="-1"/>
+
+아파치톰캣에 ojdbc8넣기
+
+톰캣에 web.xml 에서 헤드 태그에  metadata-complete="false"

@@ -1,0 +1,62 @@
+body {
+	background: #cacaca; 
+	margin: 0;
+	padding: 20px;
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light",
+		"Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+	font-weight: 300;
+}
+
+#table {
+	display: table;
+	width: 100%;
+	background: none;
+	margin: 40px 0;
+	box-sizing: border-box;
+	padding:0;
+}
+
+.caption {
+	display: block;
+	width: 100%;
+	background: #fff; 
+	background: #64e0ef; 
+	height: 55px;
+	padding-left: 10px; 
+	color: #fff; 
+	color: #000;
+	font-size: 20px;
+	line-height: 55px;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, .3);
+	box-sizing: border-box;
+}
+
+.header-row {
+	background: #8b8b8b !important;
+	color: #fff;
+}
+
+.row {
+	display: table-row;
+	background: #fff;
+}
+
+.cell {
+	display: table-cell;
+	padding: 20px 10px;
+	border-bottom: 1px solid #e5e5e5;
+	text-align: center;
+}
+.chkCell{
+	border-radius: 50px;
+    background: #fff;
+    padding: 16px 20px;
+}
+
+.primary {
+	text-align: left;
+}
+
+input[type="radio"], input[type="checkbox"] {
+	display: none;
+}

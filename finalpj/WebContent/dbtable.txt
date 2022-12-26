@@ -1,0 +1,126 @@
+--SEQUENCE란 자동으로 순차적으로 증가하는 순번을 반환하는 데이터베이스 객체, CYCLE : 설정시 최대값에 도달하면 최소값부터 다시 시작,  NOCACHE 설정시 시퀀스값을 메로리에 할당하지 않음,NEXTVAL : 시퀀스 값 증가
+--시퀀스를 돌리는 이유 기본키 를 잡기위해
+--jpa 나오면서 하나의 오브젝트는 다른 객체를 참조할때 복합키로 참조하지 않고 pk 로만 보도록 권장하고 있다.
+--jpa란 자바 진영의 ORM 기술,어플리케이션과 JDBC 사이에서 동작
+--ORM란 객체와 테이블을 매핑해서 패러다임의 불일치를 개발자 대신 해결
+
+--시퀀스 쓰는이유
+--1. 문자열 검색보다 숫자, date, 등이 검색 속도가 겁나 빠름 (클러스터 키 인덱스를 생성할때도 용량도 중요)
+--2. 중복 아이디가 발생할 수 있음 (실제로 삭제하지 않고, 같은 이메일 아이디나 핸드폰 번호의 다른 사용자가 발생할 수 있음)
+--3. 자동증가 값을 사용함으로써 핸들링하는 영역을 DBA나 테이블 생성시 컨트롤 할 수 있도록 하여, 개발단계에서 key 에 대한 고민을 하지 않아도 설계
+--4. 고유번호 생성해서 pk기능이 된다
+
+--실무에서도 시퀀스쓰는 이유도 모르고 걍쓰는사람많다 검색해서 알아두자
+
+
+
+--일단 톰캣에 web.xml 에서 헤드 태그에  metadata-complete="false"  --어노테이션들을 스캐닝할지 여부 (false)가 스캐닝안하는거임
+
+--web-inf 밑에 jsp파일을 두는 이유는 사용자 요청이 jsp 로 직접 쏘는 것을 막기위해
+
+
+
+CREATE TABLE usertable(
+    no	number(10) NOT NULL,-- 시퀀스를 받기위해 사용
+	id varchar2(40), -- ID 10자리
+	pw varchar2(40), -- 비밀번호 최대 16자리
+	name varchar2(10), -- 이름
+	birth varchar2(30), -- 생년월일
+	email varchar2(40), -- 이메일
+	tel varchar2(30), -- 번호
+	address varchar2(60) -- 주소
+);
+select * from usertable;
+--no	number(10) NOT NULL,
+CREATE SEQUENCE seq_usertable START WITH 1 INCREMENT BY 1 MAXVALUE 10000 CYCLE NOCACHE;
+
+-- DROP TABLE usertable;
+DROP TABLE usertable;
+CREATE TABLE seat (
+	id	number(10) NOT NULL,
+	theater_no	number(10) NOT NULL, -- 상영관 번호
+	location	CHAR(2)	NOT NULL, -- 좌석 번호 (A1)
+    CONSTRAINT pk_seat PRIMARY KEY(id)
+);
+
+CREATE SEQUENCE seq_seat START WITH 1 INCREMENT BY 1 MAXVALUE 10000 CYCLE NOCACHE;
+DROP TABLE seat;
+-- INSERT INTO seat values(seq_seat.NEXTVAL, 1, 'A1');
+-- delete from seat;
+
+-- DROP TABLE `movie`;
+
+CREATE TABLE movie (
+	id	number(10) NOT NULL,
+	title	varchar2(200)	NOT NULL, -- 영화명
+	image	varchar2(200)	NOT NULL, -- 영화 타이틀 이미지
+	price	number(10), -- 가격
+    CONSTRAINT pk_movie PRIMARY KEY(id)
+);
+DROP TABLE movie;
+CREATE SEQUENCE seq_movie START WITH 1 INCREMENT BY 1 MAXVALUE 10000 CYCLE NOCACHE;
+
+-- INSERT INTO movie values(seq_movie.NEXTVAL, '영화제목', 1000000);
+-- delete from movie;
+
+
+-- DROP TABLE `movie_screening`;
+
+CREATE TABLE movie_screening (
+	id	number(10) NOT NULL,
+	theater_no	number(10) NOT NULL, -- 상영관 번호
+	movie_id	number(10) NOT NULL, -- 영화 식별자
+	started_at	varchar2(20)	NOT NULL, -- 상영 시작시간 2022-12-01 13:00:00
+	ended_at	varchar2(20)	NOT NULL, -- 상영 종료시간 2022-12-01 13:00:00
+    CONSTRAINT pk_movie_screening PRIMARY KEY(id)
+);
+DROP TABLE movie_screening;
+CREATE SEQUENCE seq_movie_screening START WITH 1 INCREMENT BY 1 MAXVALUE 10000 CYCLE NOCACHE;
+
+-- INSERT INTO movie_screening values(seq_movie_screening.NEXTVAL, 1, 1, '2022-12-01 13:00:00', '2022-12-01 13:00:00');
+-- select * from movie_screening order by started_at;
+-- delete from movie_screening;
+
+
+-- DROP TABLE `reservation`;
+
+CREATE TABLE reservation (
+	id	number(10) NOT NULL,
+	movie_screening_id	number(10) NOT NULL, -- 영화 상영 식별자
+	user_id	number(10) NOT NULL, -- 사용자 식별자
+	seats	varchar2(200)	NOT NULL, -- 구매한 좌석번호목록 (구분자 ,)
+	reservated_at	varchar2(20), -- 예약일시 2022-12-01 13:00:00
+	canceled_at	varchar2(20), -- 취소일시 2022-12-01 13:00:00
+	price	number(10), -- 총 구매가격
+	paid	number(1) default 0 NOT NULL, -- 결제 여부
+	deleted	number(1) default 0 NOT NULL, -- 이력 삭제여부
+    CONSTRAINT pk_reservation PRIMARY KEY(id)
+);
+
+CREATE SEQUENCE seq_reservation START WITH 1 INCREMENT BY 1 MAXVALUE 10000 CYCLE NOCACHE;
+DROP TABLE reservation;
+-- INSERT INTO reservation values(seq_movie.NEXTVAL, 1,1, 'A1,A3,H6', '2022-12-01 13:00:00',null, 30000, 0);
+-- select * from reservation where user_id = 1 order by reservated_at desc; -- 나의 예약 내역
+-- select * from reservation where canceled_at is null and deleted = 0 and movie_screening_id = 1; -- 해당 상영중 예약된 자리 확인
+-- update reservation set seats = 'A2,D8' where id = 1; -- 예약 변경
+-- update reservation set canceled_at = '2022-12-01 13:00:00' where id = 1; -- 예약 취소
+
+
+ DROP TABLE review;
+
+CREATE TABLE review (
+	id	number(10) NOT NULL,
+	user_id	number(10) NOT NULL, -- 사용자 식별자
+	movie_id	number(10) NOT NULL, -- 영화 식별자
+	contents	varchar2(200)	NOT NULL, -- 내용
+	created_at	varchar2(20), -- 2022-12-01 13:00:00
+	star_point	number(10) NOT NULL, -- 영화 별점
+    CONSTRAINT pk_review PRIMARY KEY(id)
+);
+
+CREATE SEQUENCE seq_review START WITH 1 INCREMENT BY 1 MAXVALUE 10000 CYCLE NOCACHE;
+
+-- INSERT INTO review values(seq_review.NEXTVAL, 1, 1, '재밌었어요', '2022-12-01 13:00:00');
+-- select * from review where movie_id = 1 order by created_at desc; -- 영화별 리뷰 내역
+-- select * from review where user_id = 1 order by created_at desc; -- 나의 리뷰 내역
+-- delete from review where id = 1;
